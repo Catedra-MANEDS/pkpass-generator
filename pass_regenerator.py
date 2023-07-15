@@ -53,6 +53,7 @@ pass_type_identifier="pass.com.pepephone.eventTicket"
 
 def main():
     """Para evitar que se creen copias de carpetas si no se va a modificar nada, primero se pregunta"""
+
     """MODIFICAR EL imagenes del pase escogido"""
     que_modificar="imágenes"
     respuesta_image = preguntar_modificacion(que_modificar)
@@ -238,15 +239,16 @@ def save_pass_data_to_db(ruta_nuevo_pass_json):
     with open(ruta_nuevo_pass_json, "r") as f:
         contenido_json = json.load(f)
 
-    auth_token=contenido_json["authenticationToken"]
     serial_number= contenido_json["serialNumber"] 
     pass_type_identifier=contenido_json["passTypeIdentifier"] 
     # Formatear el timestamp como cadena de texto en el formato 'YYYY-MM-DD HH:MM:SS'
     timestamp_actual = datetime.now()
-    timestamp_actual=timestamp_actual.strftime('%d-%m-%Y %H:%M:%S')
+    timestamp_actual = timestamp_actual.strftime('%Y-%m-%d %H:%M:%S')
+    #Convertimos diccionario json a una cadena JSON para guardarlo en la base de datos
+    passDataJson = json.dumps(contenido_json)
 
-    #Añadimos los datos del nuevo pase y el auth_token a la bd
-    new_pass = Passes(passtypeidentifier=pass_type_identifier,serialnumber=serial_number,updatetimestamp=timestamp_actual,passdatajson=contenido_json)
+    #Añadimos los datos actualizados del pase a la bd
+    new_pass = Passes(passtypeidentifier=pass_type_identifier,serialnumber=serial_number,updatetimestamp=timestamp_actual,passdatajson=passDataJson)
     session.add(new_pass)
     session.commit()
     session.close()

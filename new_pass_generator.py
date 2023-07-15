@@ -202,13 +202,15 @@ def save_pass_data_to_db(ruta_nuevo_pass_json):
     pass_type_identifier=contenido_json["passTypeIdentifier"] 
     # Formatear el timestamp como cadena de texto en el formato 'YYYY-MM-DD HH:MM:SS'
     timestamp_actual = datetime.now()
-    timestamp_actual=timestamp_actual.strftime('%d-%m-%Y %H:%M:%S')
+    timestamp_actual = timestamp_actual.strftime('%Y-%m-%d %H:%M:%S')
+    #Convertimos diccionario json a una cadena JSON para guardarlo en la base de datos
+    passDataJson = json.dumps(contenido_json)
 
     #Añadimos los datos del nuevo pase y el auth_token a la bd
-    new_pass = Passes(passtypeidentifier=pass_type_identifier,serialnumber=serial_number,updatetimestamp=timestamp_actual,passdatajson=contenido_json)
+    new_pass = Passes(passtypeidentifier=pass_type_identifier,serialnumber=serial_number,updatetimestamp=timestamp_actual,passdatajson=passDataJson)
     session.add(new_pass)
     session.commit()
-    new_authentication = Authentication(authenticationtoken=auth_token)
+    new_authentication = Authentication(authenticationtoken=auth_token,passname=f'{PKPASS_NAME}.pkpass')
     session.add(new_authentication)
     session.commit()
     session.close()

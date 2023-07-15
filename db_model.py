@@ -50,5 +50,6 @@ class Authentication(Base):
     __tablename__ = 'authentication'
     authid = Column(Integer, primary_key=True)
     authenticationtoken = Column(String(100))
+    passname= Column(String(100))
 
 Base.metadata.create_all(engine)
