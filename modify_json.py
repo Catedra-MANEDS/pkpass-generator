@@ -13,8 +13,8 @@ def modificar_valor_simple(json_data):
 
 def modificar_valor_complejo(json_data):
     print("\nRecuerde el formato es:")
-    print("\t\tjson_data['eventTicket']['secondaryFields'][1]['label'] = value")
-    print("\t\teventTicket.secondaryFields.1.label")
+    print("\t\tjson_data['eventTicket']['secondaryFields'][0]['value'] = value")
+    print("\t\teventTicket.secondaryFields.0.value")
     print("\t\tEmpezando por [0]...")
     clave = input("\n\tIngrese la clave a modificar: ")
     nuevo_valor = input("\tIngrese el nuevo valor: ")

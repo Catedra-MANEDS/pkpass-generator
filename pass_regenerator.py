@@ -79,7 +79,7 @@ def main():
     if respuesta_pass == "s":
         modify_json.main(ruta_nuevo_directorio)
 
-    save_pass_data_to_db()
+    save_pass_data_to_db(ruta_nuevo_directorio)
     #Almacenamos la ruta al directorio .pass
     FOLDER_PUNTO_PASS=ruta_nuevo_directorio
 
@@ -218,9 +218,7 @@ def generar_directorio_copia(directorio):
         if archivo not in evitar_archivos:
             ruta_origen = os.path.join(directorio, archivo)
             ruta_destino=nombre_nuevo_directorio
-            ruta_archivo_final = os.path.join(nombre_nuevo_directorio, archivo)
-            print(f"La ruta destino es--> {ruta_destino}")
-            print(f"La ruta_archivo_final es--> {ruta_archivo_final}")
+            #ruta_archivo_final = os.path.join(nombre_nuevo_directorio, archivo)
             if not os.path.samefile(ruta_origen, ruta_destino):
                 shutil.copy2(ruta_origen, ruta_destino)
 
@@ -231,12 +229,13 @@ def generar_directorio_copia(directorio):
     """
     return nombre_nuevo_directorio
 
-def save_pass_data_to_db(ruta_nuevo_pass_json):
+def save_pass_data_to_db(ruta_nuevo_directorio):
 
+    ruta_archivo_json=os.path.join(ruta_nuevo_directorio, "pass.json")
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    with open(ruta_nuevo_pass_json, "r") as f:
+    with open(ruta_archivo_json, "r") as f:
         contenido_json = json.load(f)
 
     serial_number= contenido_json["serialNumber"] 
@@ -247,10 +246,16 @@ def save_pass_data_to_db(ruta_nuevo_pass_json):
     #Convertimos diccionario json a una cadena JSON para guardarlo en la base de datos
     passDataJson = json.dumps(contenido_json)
 
-    #Añadimos los datos actualizados del pase a la bd
-    new_pass = Passes(passtypeidentifier=pass_type_identifier,serialnumber=serial_number,updatetimestamp=timestamp_actual,passdatajson=passDataJson)
-    session.add(new_pass)
-    session.commit()
+
+    passes_to_update = session.query(Passes).filter(
+    (Passes.serialnumber == serial_number) & (Passes.passtypeidentifier == pass_type_identifier)
+    ).first()
+    if passes_to_update:
+    # Actualizar los atributos passdata y updatetimestamp con los valores deseados
+        passes_to_update.passdatajson = passDataJson
+        passes_to_update.updatetimestamp = timestamp_actual
+    # Confirmar los cambios realizados en la sesión
+        session.commit()
     session.close()
     print("\n Pase actualizado en la base de datos. ")
 
