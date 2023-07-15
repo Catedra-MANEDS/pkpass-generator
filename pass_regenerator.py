@@ -10,6 +10,8 @@ import modify_json as modify_json
 import change_images as change_images
 import time
 import re
+from db_model import *
+from datetime import datetime
 
 FOLDER_PUNTO_PASS = ""
 PKPASS_NAME=""
@@ -76,6 +78,7 @@ def main():
     if respuesta_pass == "s":
         modify_json.main(ruta_nuevo_directorio)
 
+    save_pass_data_to_db()
     #Almacenamos la ruta al directorio .pass
     FOLDER_PUNTO_PASS=ruta_nuevo_directorio
 
@@ -160,8 +163,6 @@ def menu_directorios_pass(directorio_a_mostrar):
 
     # Leer la selección del usuario
     opcion = input("\nSeleccione el número del pase a \033[1mMODIFICAR\033[0m: ")
-
-    # Validar la entrada del usuario
     while not opcion.isdigit() or int(opcion) < 1 or int(opcion) > len(directorios):
         print("Selección inválida. Intente nuevamente.")
         opcion = input("Seleccione el número del archivo: ")
@@ -228,6 +229,28 @@ def generar_directorio_copia(directorio):
                         porque coge la ruta del directorio+archivo, y tiene que ser solo la del directorio
     """
     return nombre_nuevo_directorio
+
+def save_pass_data_to_db(ruta_nuevo_pass_json):
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    with open(ruta_nuevo_pass_json, "r") as f:
+        contenido_json = json.load(f)
+
+    auth_token=contenido_json["authenticationToken"]
+    serial_number= contenido_json["serialNumber"] 
+    pass_type_identifier=contenido_json["passTypeIdentifier"] 
+    # Formatear el timestamp como cadena de texto en el formato 'YYYY-MM-DD HH:MM:SS'
+    timestamp_actual = datetime.now()
+    timestamp_actual=timestamp_actual.strftime('%d-%m-%Y %H:%M:%S')
+
+    #Añadimos los datos del nuevo pase y el auth_token a la bd
+    new_pass = Passes(passtypeidentifier=pass_type_identifier,serialnumber=serial_number,updatetimestamp=timestamp_actual,passdatajson=contenido_json)
+    session.add(new_pass)
+    session.commit()
+    session.close()
+    print("\n Pase actualizado en la base de datos. ")
 
 
 if __name__ == '__main__':

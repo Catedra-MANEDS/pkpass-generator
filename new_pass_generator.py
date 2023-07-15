@@ -6,10 +6,12 @@ import json
 import subprocess
 import psycopg2
 import glob 
+from datetime import datetime
 from typing import Callable, Optional, TypedDict
+from zipfile import ZipFile
 import string_generator
 from pass_object import pass_object
-from zipfile import ZipFile
+from db_model import *
 
 FOLDER_PUNTO_PASS = ""
 PKPASS_NAME=""
@@ -60,7 +62,7 @@ def main():
     ruta_nuevo_pass_json=os.path.join(directorio_del_nuevo_pase, "pass.json")
 
     pass_object_new_auth_and_serial(ruta_nuevo_pass_json)
-
+    save_pass_data_to_db(ruta_nuevo_pass_json)
     #Creamos manifest
     ruta_manifest=create_manifest_json(asset_path=FOLDER_PUNTO_PASS)
 
@@ -94,16 +96,6 @@ def main():
     
     print("\nArchivo Pkpass generado existosamente.")
     shutil.move(f"{PKPASS_NAME}.pkpass", DIRECTORIO_CON_LOS_PKPASS)
-
-def connect_to_bd():
-    con = psycopg2.connect(
-    database="passData",
-    user="samuel",
-    password="hola",
-    host="34.175.112.41",
-    port= '5432'
-    )
-    return con
 
 def menu_directorios_pass(directorio_a_mostrar):
 
@@ -183,15 +175,6 @@ def create_manifest_json(asset_path: str):
 def pass_object_new_auth_and_serial(ruta_archivo_json):
 
     auth_token = string_generator.generar_cadena_aleatoria(33)
-    #Guardamos en la bd el auth_token generado
-    # con=connect_to_bd()
-    # cursor = con.cursor()
-    # insert_sql="INSERT INTO authentication(authenticationtoken) VALUES(%s)"
-    # values=(auth_token,)
-    # cursor.execute(insert_sql,values)
-    # con.commit()
-    # cursor.close()
-    # con.close()
 
     serial_number = string_generator.generar_cadena_numeros_aleatorios(10)
     with open(ruta_archivo_json, "r") as f:
@@ -205,6 +188,31 @@ def pass_object_new_auth_and_serial(ruta_archivo_json):
         json.dump(contenido_json, f, indent=2)
 
     print("\nCambios en auth_token y serial_number guardados en el pass.json.")
+
+def save_pass_data_to_db(ruta_nuevo_pass_json):
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    with open(ruta_nuevo_pass_json, "r") as f:
+        contenido_json = json.load(f)
+
+    auth_token=contenido_json["authenticationToken"]
+    serial_number= contenido_json["serialNumber"] 
+    pass_type_identifier=contenido_json["passTypeIdentifier"] 
+    # Formatear el timestamp como cadena de texto en el formato 'YYYY-MM-DD HH:MM:SS'
+    timestamp_actual = datetime.now()
+    timestamp_actual=timestamp_actual.strftime('%d-%m-%Y %H:%M:%S')
+
+    #Añadimos los datos del nuevo pase y el auth_token a la bd
+    new_pass = Passes(passtypeidentifier=pass_type_identifier,serialnumber=serial_number,updatetimestamp=timestamp_actual,passdatajson=contenido_json)
+    session.add(new_pass)
+    session.commit()
+    new_authentication = Authentication(authenticationtoken=auth_token)
+    session.add(new_authentication)
+    session.commit()
+    session.close()
+    print("\nNuevo pase guardado en la base de datos. ")
 
 if __name__ == '__main__':
     main()
