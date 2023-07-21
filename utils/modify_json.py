@@ -2,14 +2,13 @@
 import json
 import os
 import sys
-from pass_object import pass_object
 import time
 
 def modificar_valor_simple(json_data):
     clave = input("\nIngrese la clave a modificar: ")
     nuevo_valor = input("Ingrese el nuevo valor: ")
     print()
-    json_data[clave] = nuevo_valor
+    json_data[clave] = str(nuevo_valor)
 
 def modificar_valor_complejo(json_data):
     print("\nRecuerde el formato es:")
@@ -17,7 +16,7 @@ def modificar_valor_complejo(json_data):
     print("\t\teventTicket.secondaryFields.0.value")
     print("\t\tEmpezando por [0]...")
     clave = input("\n\tIngrese la clave a modificar: ")
-    nuevo_valor = input("\tIngrese el nuevo valor: ")
+    nuevo_valor = str(input("\tIngrese el nuevo valor: "))
     print()
 
     claves = clave.split('.')
@@ -89,7 +88,7 @@ def main(ruta_directorio_punto_pass):
         contenido_json = json.load(archivo)
     
     # Mostrar el contenido JSON de forma legible y ordenada
-    mostrar_contenido_json(contenido_json, 15)
+    mostrar_contenido_json(contenido_json, 25)
 
     # Guardar los cambios en el archivo JSON
     with open(ruta_archivo_json, 'w') as archivo:

@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 import random
 import string
 
@@ -15,7 +14,6 @@ def generar_cadena_numeros_aleatorios(longitud):
         cadena += str(digito)
     return cadena
 
-
 if __name__ == '__main__':
     cadena_aleatoria=generar_cadena_aleatoria()
-    print(cadena_aleatoria)
+    numeros_aleatorios=generar_cadena_numeros_aleatorios()

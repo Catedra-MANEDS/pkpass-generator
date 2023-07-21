@@ -3,15 +3,12 @@ import os
 import shutil
 import hashlib
 import json
-import subprocess
-import psycopg2
-import glob 
 from datetime import datetime
-from typing import Callable, Optional, TypedDict
 from zipfile import ZipFile
-import string_generator
-from pass_object import pass_object
-from db_model import *
+#import string_generator
+from utils import string_generator
+#from db_model import *
+from config_db.db_model import *
 
 FOLDER_PUNTO_PASS = ""
 PKPASS_NAME=""
@@ -38,8 +35,8 @@ SUPPORTED_ASSET_FILES = [
 ]
 
 """Creamos las rutas a los certificados"""
-#directorio_certificados="/home/samuel/pass_generator/certificados/"
-directorio_certificados="/home/samuel/Documents/pkpassApple/pkpassPepephone/scp_mandar/certificados/"
+directorio_certificados="/home/samuel/pass_generator/certificados/"
+#directorio_certificados="/home/samuel/Documents/pkpassApple/pkpassPepephone/scp_mandar/certificados/"
 #Certificado de apple
 certificado_apple=directorio_certificados+"AppleWWDRCA.pem"
 #Certificado del pase
@@ -50,7 +47,6 @@ pass_pem=directorio_certificados+"pass.pem"
 key_password = "pepe"
 certificate_password="pepe"
 
-pass_type_identifier="pass.com.pepephone.eventTicket"
 
 def main():
     directorio_pass_seleccionado=menu_directorios_pass(DIRECTORIO_CON_LOS_PUNTO_PASS)
@@ -62,7 +58,7 @@ def main():
     ruta_nuevo_pass_json=os.path.join(directorio_del_nuevo_pase, "pass.json")
 
     pass_object_new_auth_and_serial(ruta_nuevo_pass_json)
-    save_pass_data_to_db(ruta_nuevo_pass_json)
+
     #Creamos manifest
     ruta_manifest=create_manifest_json(asset_path=FOLDER_PUNTO_PASS)
 
@@ -96,6 +92,8 @@ def main():
     
     print("\nArchivo Pkpass generado existosamente.")
     shutil.move(f"{PKPASS_NAME}.pkpass", DIRECTORIO_CON_LOS_PKPASS)
+    ruta_al_pkpass=os.path.join(DIRECTORIO_CON_LOS_PKPASS, f"{PKPASS_NAME}.pkpass")
+    save_pass_data_to_db(ruta_nuevo_pass_json,ruta_al_pkpass)
 
 def menu_directorios_pass(directorio_a_mostrar):
 
@@ -189,7 +187,7 @@ def pass_object_new_auth_and_serial(ruta_archivo_json):
 
     print("\nCambios en auth_token y serial_number guardados en el pass.json.")
 
-def save_pass_data_to_db(ruta_nuevo_pass_json):
+def save_pass_data_to_db(ruta_nuevo_pass_json,ruta_al_pkpass):
 
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -207,10 +205,10 @@ def save_pass_data_to_db(ruta_nuevo_pass_json):
     passDataJson = json.dumps(contenido_json)
 
     #Añadimos los datos del nuevo pase y el auth_token a la bd
-    new_pass = Passes(passtypeidentifier=pass_type_identifier,serialnumber=serial_number,updatetimestamp=timestamp_actual,passdatajson=passDataJson)
+    new_pass = Passes(passtypeidentifier=pass_type_identifier,serialnumber=serial_number,pkpass_name=f'{PKPASS_NAME}.pkpass',pkpass_route=ruta_al_pkpass,updatetimestamp=timestamp_actual,passdatajson=passDataJson)
     session.add(new_pass)
     session.commit()
-    new_authentication = Authentication(authenticationtoken=auth_token,passname=f'{PKPASS_NAME}.pkpass')
+    new_authentication = Authentication(authenticationtoken=auth_token,pkpass_name=f'{PKPASS_NAME}.pkpass')
     session.add(new_authentication)
     session.commit()
     session.close()

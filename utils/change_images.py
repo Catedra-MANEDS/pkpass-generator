@@ -2,12 +2,18 @@ import os
 import shutil
 import time
 
-
 def mostrar_menu(opciones):
     print("\nSeleccione una opción:")
     for i, opcion in enumerate(opciones, start=1):
         print(f"\t{i}. {opcion}")
     return input("Ingrese el número de la imagen a modificar: ")
+
+def eliminar_imagen_residual(ruta_imagen_residual):
+    try:
+        os.remove(ruta_imagen_residual)
+        print(f"\nArchivo {ruta_imagen_residual} eliminado con éxito.")
+    except FileNotFoundError:
+        print(f"\nEl archivo {ruta_imagen_residual} no existe.")
 
 def modificar_strip_image(ruta_strip):
     imagenes = [f for f in os.listdir(ruta_strip) if f.endswith(".png")]
@@ -74,9 +80,11 @@ def main(ruta_directorio_pass):
         if opcion == "1":
             ruta_nueva_imagen=modificar_strip_image(ruta_strip)
             shutil.copy2(ruta_nueva_imagen, ruta_directorio_pass)
+            eliminar_imagen_residual(ruta_nueva_imagen)
         elif opcion == "2":
             ruta_nueva_imagen=modificar_footer_image(ruta_footer)
             shutil.copy2(ruta_nueva_imagen, ruta_directorio_pass)
+            eliminar_imagen_residual(ruta_nueva_imagen)
         elif opcion == "0":
             break
         else:

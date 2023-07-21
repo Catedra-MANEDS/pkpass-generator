@@ -3,15 +3,15 @@ import os
 import shutil
 import hashlib
 import json
-import sys
-from pass_object import pass_object
-from zipfile import ZipFile
-import modify_json as modify_json
-import change_images as change_images
-import time
-import re
-from db_model import *
+import requests
+import re   #module for regular expresions
 from datetime import datetime
+from zipfile import ZipFile
+#import modify_json as modify_json
+#import change_images as change_images
+from utils import change_images as change_images
+from utils import modify_json as modify_json
+from config_db.db_model import *
 
 FOLDER_PUNTO_PASS = ""
 PKPASS_NAME=""
@@ -38,8 +38,8 @@ SUPPORTED_ASSET_FILES = [
 ]
 
 """Creamos las rutas a los certificados"""
-#directorio_certificados="/home/samuel/pass_generator/certificados/"
-directorio_certificados="/home/samuel/Documents/pkpassApple/pkpassPepephone/scp_mandar/certificados/"
+directorio_certificados="/home/samuel/pass_generator/certificados/"
+#directorio_certificados="/home/samuel/Documents/pkpassApple/pkpassPepephone/scp_mandar/certificados/"
 #Certificado de apple
 certificado_apple=directorio_certificados+"AppleWWDRCA.pem"
 #Certificado del pase
@@ -50,6 +50,7 @@ pass_pem=directorio_certificados+"pass.pem"
 key_password = "pepe"
 certificate_password="pepe"
 pass_type_identifier="pass.com.pepephone.eventTicket"
+serial_number=""
 
 def main():
     """Para evitar que se creen copias de carpetas si no se va a modificar nada, primero se pregunta"""
@@ -79,7 +80,6 @@ def main():
     if respuesta_pass == "s":
         modify_json.main(ruta_nuevo_directorio)
 
-    save_pass_data_to_db(ruta_nuevo_directorio)
     #Almacenamos la ruta al directorio .pass
     FOLDER_PUNTO_PASS=ruta_nuevo_directorio
 
@@ -121,9 +121,49 @@ def main():
         os.replace(f"{PKPASS_NAME}.pkpass", ruta_destino)
     else:
         shutil.move(f"{PKPASS_NAME}.pkpass", ruta_destino)
-    ruta_al_directorio_de_pases = os.path.abspath(DIRECTORIO_CON_LOS_PKPASS)
-    ruta_absoluta_al_pkpass = os.path.join(ruta_al_directorio_de_pases, f"{PKPASS_NAME}.pkpass")
+        
+    ruta_directorio_pkpass = os.path.abspath(DIRECTORIO_CON_LOS_PKPASS)
+    ruta_absoluta_al_pkpass = os.path.join(ruta_directorio_pkpass, f"{PKPASS_NAME}.pkpass")
+
+    #Actualizamos datos del pase en la bd
+    save_pass_data_to_db(ruta_nuevo_directorio,ruta_absoluta_al_pkpass)
+
+    # """Generamos una solicitud """
+    url_base = "https://pepephone.jumpingcrab.com:5000"
+    # subdominios_pase = [pass_type_identifier, serial_number, "Modified"]
+    # datos_ruta_pkpass={"ruta_al_pkpass": ruta_absoluta_al_pkpass }
+    #hacer_solicitud_post(url_base, subdominios_pase,datos_ruta_pkpass)
+    url = f"{url_base}/notify_apple_devices/{pass_type_identifier}/{serial_number}"
+    respuesta_server=notify_apple_devices(url)
+    print(f"\n{respuesta_server}")
+
     return ruta_absoluta_al_pkpass
+
+"""-----------------------------------FUNCIONES AUXILIARES-------------------------------------------"""
+def hacer_solicitud_post(base_url, subdominios, datos):
+    try:
+        # Concatenar los subdominios a la base_url
+        url = f"{base_url}/{'/'.join(subdominios)}"
+
+        # Convertir los datos a JSON
+        datos_json = json.dumps(datos)
+
+        # Configurar el encabezado para indicar que se está enviando JSON
+        headers = {'Content-Type': 'application/json'}
+
+        # Realizar la solicitud POST con los datos en el cuerpo
+        response = requests.post(url, data=datos_json, headers=headers)
+
+        # Comprobar si la solicitud fue exitosa (código de estado 200)
+        if response.status_code == 200:
+            print("Solicitud exitosa")
+            print("\nContenido de la respuesta:")
+            print(response.text)
+        else:
+            print(f"Error en la solicitud. Código de estado: {response.status_code}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error al realizar la solicitud: {e}")
 
 def preguntar_modificacion(que_modificar):
     respuesta = ""
@@ -229,8 +269,10 @@ def generar_directorio_copia(directorio):
     """
     return nombre_nuevo_directorio
 
-def save_pass_data_to_db(ruta_nuevo_directorio):
+def save_pass_data_to_db(ruta_nuevo_directorio,ruta_absoluta_al_pkpass):
 
+    #La variable serial_number será accedida desde main 
+    global serial_number, pass_type_identifier
     ruta_archivo_json=os.path.join(ruta_nuevo_directorio, "pass.json")
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -246,19 +288,27 @@ def save_pass_data_to_db(ruta_nuevo_directorio):
     #Convertimos diccionario json a una cadena JSON para guardarlo en la base de datos
     passDataJson = json.dumps(contenido_json)
 
-
     passes_to_update = session.query(Passes).filter(
-    (Passes.serialnumber == serial_number) & (Passes.passtypeidentifier == pass_type_identifier)
-    ).first()
+    (Passes.serialnumber == serial_number) & (Passes.passtypeidentifier == pass_type_identifier)).first()
     if passes_to_update:
     # Actualizar los atributos passdata y updatetimestamp con los valores deseados
         passes_to_update.passdatajson = passDataJson
         passes_to_update.updatetimestamp = timestamp_actual
+        passes_to_update.pkpass_name = f"{PKPASS_NAME}.pkpass"
+        passes_to_update.pkpass_route = ruta_absoluta_al_pkpass
     # Confirmar los cambios realizados en la sesión
         session.commit()
     session.close()
-    print("\n Pase actualizado en la base de datos. ")
-
+    print("\nPase actualizado en la base de datos. ")
+    
+def notify_apple_devices(url):
+    try:
+        response = requests.post(url)
+        response.raise_for_status()  # Lanza una excepción si la respuesta tiene un código de error
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error al realizar la llamada al endpoint: {e}")
+        return f"Error al realizar la llamada al endpoint: {e}"
 
 if __name__ == '__main__':
     """El main de pass_regenerator retorna la ruta al pkpass modificado"""

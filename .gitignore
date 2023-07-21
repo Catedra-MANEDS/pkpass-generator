@@ -1,2 +1,6 @@
 __pycache__
 views/__pycache__
+utils/__pycache__
+config_db/__pycache__
+post_request_generator.py
+scripts_python_extra

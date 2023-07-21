@@ -1,7 +1,6 @@
+#!/usr/bin/python3
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, UniqueConstraint, TIMESTAMP, Text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
-import psycopg2
+from sqlalchemy.orm import declarative_base,sessionmaker
 
 #Conexion con la bd
 username = "samuel"
@@ -26,6 +25,8 @@ class Passes(Base):
     pkid = Column(Integer, primary_key=True)
     passtypeidentifier = Column(String(100))
     serialnumber = Column(String(100))
+    pkpass_name = Column(String(150))
+    pkpass_route = Column(String(200))
     updatetimestamp=Column(TIMESTAMP(timezone=False))
     passdatajson=Column(Text)
 
@@ -44,12 +45,12 @@ class Apilog(Base):
     __tablename__ = 'apilog'
     pkid = Column(Integer, primary_key=True)
     apilog = Column(String(5000))
-    timestamp=Column(TIMESTAMP(timezone=False))
+    timestamp= Column(TIMESTAMP(timezone=False))
     
 class Authentication(Base):
     __tablename__ = 'authentication'
     authid = Column(Integer, primary_key=True)
     authenticationtoken = Column(String(100))
-    passname= Column(String(100))
+    pkpass_name= Column(String(100))
 
 Base.metadata.create_all(engine)
