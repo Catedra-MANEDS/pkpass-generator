@@ -39,7 +39,7 @@ def mostrar_menu():
             print("Saliendo del programa...")
             break
         else:
-            print("Opción inválida. Por favor, seleccione un número del 1 al 4.")
+            print("Opción inválida. Por favor, seleccione un número del 1 al 5.")
 
 # Llamar a la función para mostrar el menú
 try:

@@ -6,7 +6,7 @@ import re #para expresiones regulares
 #from db_model import *
 ruta_directorio_padre = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(ruta_directorio_padre)
-from config_db.db_model import *
+from models.db_model import *
 
 def eliminar_directorio_seleccionado_y_archivo_correspondiente(ruta_directorio):
     # Obtener una lista de directorios en el directorio especificado
@@ -16,22 +16,21 @@ def eliminar_directorio_seleccionado_y_archivo_correspondiente(ruta_directorio):
         print("No se encontraron directorios en el directorio especificado.")
         return
 
-    print("Directorios disponibles en el directorio:")
+    print("\nDirectorios disponibles en el directorio:")
     for i, nombre_directorio in enumerate(directorios, start=1):
         print(f"\t{i}. {nombre_directorio}")
 
     while True:
         try:
             # Pedir al usuario que seleccione un directorio por su número
-            seleccion = int(input("Seleccione el número del directorio a eliminar: "))
-            
+            seleccion = int(input("\nSeleccione el número del directorio a eliminar: "))
             if 1 <= seleccion <= len(directorios):
                 directorio_seleccionado = directorios[seleccion - 1]
                 ruta_directorio_seleccionado = os.path.join(ruta_directorio, directorio_seleccionado)
                 #Si es directorio tipo _new_X, actualizamos el pase a la ruta del directorio base
-                if acaba_en_new_x_pass:
+                if acaba_en_new_x_pass(ruta_directorio_seleccionado):
                     actualizar_pase_en_bd(ruta_directorio_seleccionado)
-                 #Si NO es directorio tipo _new_X, será un directorio base y se elimina de la bd
+                #Si NO es directorio tipo _new_X, será un directorio base y se elimina de la bd
                 else:
                     #Eliminar el pase de la bd
                     eliminar_pase_en_bd(ruta_directorio_seleccionado)
@@ -48,12 +47,12 @@ def eliminar_directorio_seleccionado_y_archivo_correspondiente(ruta_directorio):
                     os.remove(ruta_archivo_correspondiente)
                     print(f"\n{archivo_correspondiente} ha sido eliminado del directorio de pkpass.")
                 else:
-                    print(f"{archivo_correspondiente} no existe en el directorio de pkpass.")
+                    print(f"\n{archivo_correspondiente} no existe en el directorio de pkpass.")
                 break
             else:
                 print("Selección inválida. Por favor, elija un número válido.")
-        except ValueError:
-            print("Entrada inválida. Por favor, ingrese un número.")
+        except ValueError as e:
+            print(f"Error: Entrada inválida. Por favor, ingrese un número válido. \nDetalles del error: {e}")
 
 def eliminar_directorio_recursivo(ruta_directorio):
     for root, _, archivos in os.walk(ruta_directorio, topdown=False):

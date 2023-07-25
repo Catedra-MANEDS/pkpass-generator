@@ -1,0 +1,53 @@
+CREACION DE CERTIFICADOS POR ORDEN
+	Tutorial --> https://github.com/tomasmcguinness/dotnet-passbook/blob/master/using-openssl.md
+
+1.CREAMOS EL IDENTIFICADOR EN LA WEB DE APPLE
+
+
+2.CREAMOS EL CSR PARA LA WEB DE APPLE
+
+	openssl req -new -newkey rsa:2048 -out passkey.csr -keyout passkey.key
+	
+	ESTO GENERA
+	1.passkey.key --> contains your private signing key
+
+	2.passkey.csr --> contains your certificate signing request
+	
+   COMANDO PARA QUE GENERE LA CLAVE SIN NECESIDAD DE CONTRASEÑA
+	
+	openssl req -new -newkey rsa:2048 -nodes -out passkey.csr -keyout passkey.key
+
+   CONVERTIR LA CLAVE PRIVADA A FORMATO .pem
+	
+	openssl rsa -in passkey.key -out passkey.pem
+
+
+4.SEGUIMOS LOS PASOS EN LA WEB DE APPLE Y USAMOS EL passkey.csr generado para generar el certificado del pase 
+	
+	GENERA
+	
+	pass.cer --> certificado a usar con la wallet
+
+5.CONVERTIMOS EL CERTIFICADO RECIEN DESCARGADO A FORMATO PEM
+
+	openssl x509 -in pass.cer -inform der -out passcertificate.pem
+
+	GENERA
+		
+	passcertificate.pem
+
+6.CONVERTIR EL certifcado en PEM  pk.12:
+	openssl pkcs12 -export -out passcertificate.p12 -inkey passkey.key -in passcertificate.pem
+	
+	openssl pkcs12 -export -clcerts -inkey passkey.key -in pass.pem -certfile AppleWWDRCA.pem -name "Company Name" -out pkpass.p12
+	
+    CON ESTO METEMOS EL CERTIFICADO DE APPLE, LA CLAVE Y CERTIFICADO GENERADO EN LA WEB EN EL .P12
+	
+	openssl pkcs12 -export -clcerts -inkey passkey3.key -in passcertificate3.pem -certfile AppleWWDRCA.pem -out passcertificate3.p12
+
+   Con esto convertidmos el .p12 a formato PEM
+   
+	openssl pkcs12 -in passcertificate3.p12 -out passcertificate_completo3.pem
+	
+	
+	

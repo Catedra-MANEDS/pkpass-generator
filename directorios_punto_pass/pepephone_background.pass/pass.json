@@ -13,11 +13,10 @@
     "organizationName": "PepePhone",
     "description": "Contrato",
     "logoText": "PepePhone",
-    "foregroundColor2": "rgb(212,208,0)",
     "foregroundColor": "rgb(0,0,0)",
     "backgroundColor2": "rgb(6, 222, 241)",
     "backgroundColor": "rgb(153, 0, 0)",
-    "labelColor": "rgb(255, 255, 255)",
+    "labelColor": "rgb(0, 0, 0)",
     "stripColor": "rgb(0,0,0)",
     "eventTicket": {
         "headerFields": [
@@ -25,6 +24,13 @@
                 "key": "titular",
                 "label": "TITULAR",
                 "value": "Samuel"
+            }
+        ],
+        "primaryFields" : [
+            {
+                "key" : "titulo",
+                "label" : "Offer",
+                "value" : "Conoces nuestras ofertas de verano?"
             }
         ],
         "secondaryFields": [
@@ -37,7 +43,8 @@
             {
                 "key": "fibra",
                 "label": "Fibra",
-                "value": "300mb"
+                "value": "300mb",
+                "textAlignment": "PKTextAlignmentCenter"
             },
             {
                 "key": "gigas",
@@ -49,9 +56,7 @@
             {
                 "key": "Oferta",
                 "label": "\u00A1Oferta excluvisa!",
-                "value": "Este verano, gigas gratis",
-                "textAlignment": "PKTextAlignmentNatural"
-
+                "value": "Este verano, gigas gratis"
             }
         ],
         "backFields": [
