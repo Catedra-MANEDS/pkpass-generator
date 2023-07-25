@@ -37,8 +37,10 @@ Script que modifica y actualiza un pase ya existente.
 
 ## directorios_auxiliares
 
-- models --> contiene el modelo de tablas de la base de datos Postgress gestionada con SQLAlchemy
-- utils -->
+- models --> directorio que contiene el modelo de tablas de la base de datos Postgress gestionada con SQLAlchemy
+- utils --> directorio que contiene metodos auxiliares empleados por los scripts principales
+
+	- common_functions.py --> contiene las funciones comunes a los dos scripts principales para la gestion de pases 
 
 - pkpass_files --> directorio donde se almacenan los ficheros .pkpass generados
 - directorios_punto_pass --> directorio con los directorios .pass que contienen los ficheros empleados para generar el fichero .pkpass
