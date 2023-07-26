@@ -3,6 +3,7 @@ import os
 import hashlib
 import json
 import shutil
+import requests
 from zipfile import ZipFile
 from utils import constants as globals
 
@@ -79,12 +80,12 @@ def generar_signature(ruta_manifest,ruta_signature):
         # Intentar ejecutar el comando sin contraseña
         result = subprocess.run(cmd_no_password, check=True, capture_output=True, text=True)
         if result.returncode == 0:
-            print("Firma creada exitosamente (sin contraseña)")
+            print("\nFirma creada exitosamente (sin contraseña)")
         else:
             # Si se produce un error, significa que la clave requiere contraseña,
             # entonces intentar ejecutar el comando con contraseña
             result = subprocess.run(cmd_with_password, check=True)
-            print("Firma creada exitosamente (con contraseña)")
+            print("F\nirma creada exitosamente (con contraseña)")
 
     except subprocess.CalledProcessError as e:
         print("Error al firmar:", e)
@@ -105,6 +106,7 @@ def generate_pkpass(FOLDER_PUNTO_PASS,PKPASS_NAME):
     with ZipFile(f"{PKPASS_NAME}.pkpass", "w") as zip_file:
         for asset_file in asset_files:
             zip_file.write(asset_file)
+    print(asset_files)
 
     #Eliminamos los ficheros del directorio actual usados para crear el zip
     print("\nEliminacion de archivos residuales...")
@@ -117,3 +119,29 @@ def generate_pkpass(FOLDER_PUNTO_PASS,PKPASS_NAME):
             print(f"El archivo no existe: {file_name}.")
     
     print("\nArchivo Pkpass generado existosamente.")
+
+#---------------------------------------------------------------------------------------
+#Funcion para notificar a apple de que se ha realizado un cambio en el pase
+def notify_apple_devices(url_base,pass_type_identifier,serial_number):
+    
+    #Creamos la URL destino de la solicitud
+    url = f"{url_base}/notify_apple_devices/{pass_type_identifier}/{serial_number}"
+    try:
+        response = requests.post(url)
+        response.raise_for_status()  # Lanza una excepción si la respuesta tiene un código de error
+        # Verificar si la respuesta está vacía
+        if not response.text:
+            print("La respuesta está vacía.")
+            return None
+        
+        # Si el tipo de contenido es texto plano
+        if 'text/plain' in response.headers.get('content-type', '').lower():
+            return response.text
+        
+        # Si no es texto plano, asumir que es JSON
+        else:
+            return response.json()
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error al realizar la llamada al endpoint: {e}")
+        return f"Error al realizar la llamada al endpoint: {e}"

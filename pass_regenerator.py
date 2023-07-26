@@ -69,8 +69,7 @@ def main():
 
     # """Generamos una solicitud """
     url_base = "https://pepephone.jumpingcrab.com:5000"
-    url = f"{url_base}/notify_apple_devices/{pass_type_identifier}/{serial_number}"
-    respuesta_server=notify_apple_devices(url)
+    respuesta_server=common_functions.notify_apple_devices(url_base,pass_type_identifier,serial_number)
     print(f"\n{respuesta_server}")
 
     return ruta_absoluta_al_pkpass
@@ -169,27 +168,6 @@ def save_pass_data_to_db(ruta_nuevo_directorio,ruta_absoluta_al_pkpass):
     session.close()
     print("\nPase actualizado en la base de datos. ")
     
-def notify_apple_devices(url):
-    try:
-        response = requests.post(url)
-        response.raise_for_status()  # Lanza una excepción si la respuesta tiene un código de error
-        # Verificar si la respuesta está vacía
-        if not response.text:
-            print("La respuesta está vacía.")
-            return None
-        
-        # Si el tipo de contenido es texto plano
-        if 'text/plain' in response.headers.get('content-type', '').lower():
-            return response.text
-        
-        # Si no es texto plano, asumir que es JSON
-        else:
-            return response.json()
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error al realizar la llamada al endpoint: {e}")
-        return f"Error al realizar la llamada al endpoint: {e}"
-
 if __name__ == '__main__':
     """El main de pass_regenerator retorna la ruta al pkpass modificado"""
     ruta_absoluta_al_pkpass=main()
