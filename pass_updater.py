@@ -11,8 +11,8 @@ from utils import change_value_json as change_value_json
 
 def main():
     """Para evitar que se creen copias de carpetas si no se va a modificar nada, primero se pregunta"""
-
     directorio_pass_seleccionado=common_functions.menu_directorios_pass(globals.DIRECTORIO_CON_LOS_PUNTO_PASS)
+    copiar_y_renombrar_directorio(directorio_pass_seleccionado,globals.DIRECTORIO_CON_LOS_PUNTO_PASS)
 
     #Separamos el nombre y la extesion .pass del directorio
     partes = directorio_pass_seleccionado.split("/")
@@ -45,7 +45,7 @@ def main():
     ruta_absoluta_al_pkpass = os.path.abspath(ruta_destino)
 
     #Actualizamos datos del pase en la bd
-    save_pass_data_to_db(directorio_pass_seleccionado,ruta_absoluta_al_pkpass)
+    save_pass_data_to_db(directorio_pass_seleccionado,ruta_absoluta_al_pkpass,PKPASS_NAME)
 
     # """Generamos una solicitud """
     url_base = "https://pepephone.jumpingcrab.com:5000"
@@ -53,7 +53,7 @@ def main():
     print(f"\n{respuesta_server}")
 
 
-def save_pass_data_to_db(ruta_nuevo_directorio,ruta_absoluta_al_pkpass):
+def save_pass_data_to_db(ruta_nuevo_directorio,ruta_absoluta_al_pkpass,PKPASS_NAME):
 
     #La variable serial_number será accedida desde main 
     global serial_number, pass_type_identifier
@@ -84,3 +84,50 @@ def save_pass_data_to_db(ruta_nuevo_directorio,ruta_absoluta_al_pkpass):
         session.commit()
     session.close()
     print("\nPase actualizado en la base de datos. ")
+
+
+def copiar_y_renombrar_directorio(ruta_original, directorio_destino):
+    # Verificar que la ruta original exista
+    if not os.path.exists(ruta_original):
+        print(f"Error: El directorio {ruta_original} no existe.")
+        return
+
+    try:
+        os.mkdir(os.path.join(directorio_destino, "copia.pass"))
+        # Crear una copia del directorio en la ruta de destino
+    except FileExistsError:
+        print("Error: El directorio de destino ya existe.")
+        return
+
+    evitar_archivos = [
+        "signature",
+        "manifest.json",
+    ]
+
+    # Copiar los archivos del directorio original al nuevo directorio
+    archivos = os.listdir(ruta_original)
+    for archivo in archivos:
+        if archivo not in evitar_archivos:
+            ruta_origen = os.path.join(ruta_original, archivo)
+            ruta_destino = os.path.join(directorio_destino, "copia.pass")
+            if not os.path.samefile(ruta_origen, ruta_destino):
+                shutil.copy2(ruta_origen, ruta_destino)
+
+
+    # Renombrar el directorio copia al nombre del directorio original
+    try:
+        os.rename(ruta_original,os.path.join(directorio_destino, "basura.pass"))
+        # Eliminar el directorio original
+        eliminar_directorio_recursivo(os.path.join(directorio_destino, "basura.pass"))
+        os.rename(os.path.join(directorio_destino, "copia.pass"), os.path.basename(ruta_original))
+        print("Directorio copia renombrado correctamente.")
+    except OSError as e:
+        print(f"Error al renombrar el directorio copia: {e}")
+        return
+    
+def eliminar_directorio_recursivo(ruta_directorio):
+    for root, _, archivos in os.walk(ruta_directorio, topdown=False):
+        for archivo in archivos:
+            ruta_archivo = os.path.join(root, archivo)
+            os.remove(ruta_archivo)
+        os.rmdir(root)

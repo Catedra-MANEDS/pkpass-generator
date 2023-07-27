@@ -1,8 +1,27 @@
+import os
+
+# Obtener la ruta del directorio actual donde se encuentra constants.py
+# constants_directory = os.path.dirname(os.path.abspath(__file__))
+
+# # Construir la ruta absoluta al directorio "directorios_punto_pass"
+# ruta_directorios_punto_pass = os.path.join(constants_directory, "..", "pass_generator", "directorios_punto_pass")
+# ruta_pkpass_files = os.path.join(constants_directory, "..", "pass_generator", "pkpass_files")
+
+# Obtener la ruta absoluta al directorio "pass_generator"
+pass_generator_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Construir la ruta absoluta al directorio "directorios_punto_pass"
+ruta_directorios_punto_pass = os.path.join(pass_generator_directory, "directorios_punto_pass")
+
+# Construir la ruta absoluta al directorio "pkpass_files"
+ruta_pkpass_files = os.path.join(pass_generator_directory, "pkpass_files")
+
+
+DIRECTORIO_CON_LOS_PUNTO_PASS = ruta_directorios_punto_pass
+DIRECTORIO_CON_LOS_PKPASS=ruta_pkpass_files
 FOLDER_PUNTO_PASS = ""
 PKPASS_NAME=""
 OPENSSL_APP = "openssl"
-DIRECTORIO_CON_LOS_PUNTO_PASS = "./directorios_punto_pass"
-DIRECTORIO_CON_LOS_PKPASS="./pkpass_files/"
 
 SUPPORTED_ASSET_FILES = [
     "icon.png",
@@ -28,10 +47,10 @@ pass_type_identifier=""
 serial_number=""
 
 """Ruta certificados en la vm"""
-#directorio_certificados="/home/samuel/pass_generator/certificados/"
+directorio_certificados="/home/samuel/pass_generator/certificados/"
 
 """----------PASE PEPE NORMAL----------"""
-directorio_certificados="/home/samuel/Documents/pkpassApple/pkpassPepephone/scp_mandar/certificados/"
+# directorio_certificados="/home/samuel/Documents/pkpassApple/pkpassPepephone/scp_mandar/certificados/"
 #Certificado del pase
 pass_certificate=directorio_certificados+"passcertificate.pem"
 #Clave del pase

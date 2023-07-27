@@ -31,8 +31,8 @@
       {
         "key": "mes",
         "label": "MES",
-        "value": "Abril",
-        "changeMessage": "Ya es %@ y en Pepephone lo sabemos, \u00a1disfruta de las nuevas promociones!"
+        "value": "Mayo",
+        "changeMessage": "Ya es %@ y en Pepephone lo sabemos, disfruta de las nuevas promociones!"
       },
       {
         "key": "fibra",
@@ -49,10 +49,10 @@
     "auxiliaryFields": [
       {
         "key": "oferta_principal",
-        "label": "\u00a1Oferta excluvisa!",
-        "value": "Este verano, gigas gratis",
+        "label": "Promos",
+        "value": "Este verano, gigas extras, \u00a1gratis!",
         "textAlignment": "PKTextAlignmentNatural",
-        "changeMessage": "GBs actualizadas %@, necesitas mas?"
+        "changeMessage": "%@"
       }
     ],
     "backFields": [

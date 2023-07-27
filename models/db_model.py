@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, UniqueConstraint, TIMESTAMP, Text, Date, Boolean
-from sqlalchemy.orm import declarative_base,sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship 
 
 #Conexion con la bd
 username = "samuel"
@@ -53,59 +53,49 @@ class Authentication(Base):
     authenticationtoken = Column(String(100))
     pkpass_name= Column(String(100))
 
-class Cliente(Base):
+"""------------------------------------Campañas------------------------------------------"""
+class Clientes(Base):
     __tablename__ = 'clientes'
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(80))
     edad = Column(Integer)
     correo = Column(String(120))
     fecha_fin_contrato = Column(Date)
     fecha_inicio_contrato = Column(Date)
-    genero = Column(String(15))  # Puedes ajustar la longitud según tus necesidades
-    mes_registro = Column(String(20))  # Puedes ajustar la longitud según tus necesidades
+    genero = Column(String(15))
+    ruta_directorio_pass = Column(String(200))
 
-"""---------------------MODELO DE TABLAS DE CAMPAÑAS DE NOTIFICACIONES------------------"""
+    campaign_id = Column(Integer, ForeignKey('campaigns.campaign_id'))
+    campaign = relationship('Campaigns', backref='clientes')
 
-# Modelo de la tabla "Campaigns"
 class Campaigns(Base):
+    __tablename__ = 'campaigns'
+    campaign_id = Column(Integer, primary_key=True, autoincrement=True)
+    campaign_title = Column(String(100), nullable=False)
+    begin_date = Column(Date)
+    end_date = Column(Date)
+    status = Column(Boolean)
 
-    __tablename__ = 'Campaigns'
+    campaign_notifications = relationship('Campaign_notifications', back_populates='campaign')
+    campaign_rules = relationship('Campaign_rules', back_populates='campaign')
 
-    Campaign_ID = Column(Integer, primary_key=True, autoincrement=True)
-    Campaign_title = Column(String(100), nullable=False)
-    BeginDate = Column(Date)
-    EndDate = Column(Date)
-    Status = Column(Boolean)
-
-# Modelo de la tabla "Campaign_notifications"
 class Campaign_notifications(Base):
+    __tablename__ = 'campaign_notifications'
+    campaign_id = Column(Integer, ForeignKey('campaigns.campaign_id'), primary_key=True)
+    message = Column(String(255), nullable=False)
+    pass_field_to_update = Column(String(150))
 
-    __tablename__ = 'Campaign_notifications'
+    campaign = relationship('Campaigns', back_populates='campaign_notifications')
 
-    Campaign_ID = Column(Integer, ForeignKey('Campaigns.Campaign_ID'), primary_key=True)
-    Message = Column(String(255), nullable=False)
-    Pass_field_to_update = Column(String(150))
-
-# Modelo de la tabla "Campaign_rules"
 class Campaign_rules(Base):
+    __tablename__ = 'campaign_rules'
+    campaign_id = Column(Integer, ForeignKey('campaigns.campaign_id'), primary_key=True)
+    age_start = Column(Integer)
+    age_end = Column(Integer)
+    gender = Column(String(15))
+    begin_date = Column(Date)
+    end_date = Column(Date)
 
-    __tablename__ = 'Campaign_rules'
-
-    Campaign_ID = Column(Integer, ForeignKey('Campaigns.Campaign_ID'), primary_key=True)
-    Age_start = Column(Integer)
-    Age_end = Column(Integer)
-    Gender = Column(String(15))
-    BeginDate = Column(Date)
-    EndDate = Column(Date)
-
-# Modelo de la tabla "CampaignsSubscriptions"
-class Campaigns_subscriptions(Base):
-
-    __tablename__ = 'Campaigns_subscriptions'
-
-    Campaign_ID = Column(Integer, ForeignKey('Campaigns.Campaign_ID'), primary_key=True)
-    serialnumber = Column(String(100))
-    passTypeIdentifier = Column(String(100))
-    pushToken = Column(String(150))
+    campaign = relationship('Campaigns', back_populates='campaign_rules')
 
 Base.metadata.create_all(engine)

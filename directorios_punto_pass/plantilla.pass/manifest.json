@@ -1,10 +1,12 @@
 {
-    "pass.json": "8e6516f7127be3e382d27c8e0bd0397b2a3c24e8",
+    "pass.json": "9bbfc1a67855c1aa5d74439f44b2d3145e039340",
     "logo@2x.png": "b3180d9be1065f2f5c54bc46cddb4ca5668964dc",
     "logo.png": "f561947d97b6c59a0ff7f6fc639fe980b52a0770",
     "footer@2x.png": "8e5959a81de640c01f18c5b31b243dd9ae7689ee",
     "icon@2x.png": "cdace7c86b73b53ce451cc8d1f580c46417b1821",
+    "manifest.json": "6a93442a2bdc3e6e786807469c78c8cd645fc441",
     "footer.png": "46482e7bb285ede09b776ffa130b13e5f46f4ccd",
+    "signature": "2a66d563f7485e3645d53041fa52aa0de4128b37",
     "strip@2x.png": "7eaf8974e1041b2b487437a5f163028a8c102d0b",
     "strip.png": "595e76df6daf1624bdd53aff3f879e641b735897",
     "icon.png": "b6028fa361a3ec55a0dd90591e4305779cbe98d8"

@@ -65,3 +65,6 @@ def main(directorio_pass_seleccionado):
 
 if __name__ == "__main__":
     main()
+
+# contenido_json["eventTicket"]["backFields"][-1]["value"] = nuevo_valor_image_change
+# contenido_json["auxiliaryFields"][0]["value"] = nuevo_valor_oferta_principal
