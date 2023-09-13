@@ -16,14 +16,29 @@ from models.db_model import *
 
 def main():
 
-    if len(sys.argv) < 4:
-        print("Usage: python3 path_auto_new_pass_regenerator.py <message> <nombre> <campaign_id>")
+    if len(sys.argv) < 7:
+        print("Usage: python3 auto_new_pass_fields_regenerator.py <nombre> <campaign_id> <gigas> <facturacion> <mes> <ruta_al_pase>")
         sys.exit(1)
 
     # Obtener los argumentos de entrada pasados al script
-    campaing_message = sys.argv[1]
-    nombre = sys.argv[2]
-    campaign_id = int(sys.argv[3])
+    nombre = sys.argv[1] 
+    if sys.argv[2] != '':
+        campaign_id = int(sys.argv[2])
+    else:
+        campaign_id= ""
+
+    if sys.argv[3] != '':
+        gigas = int(sys.argv[3])
+    else:
+        gigas=""
+
+    if sys.argv[4] != '':
+        facturacion = int(sys.argv[4])
+    else:
+        facturacion=""
+
+    mes = sys.argv[5]
+    ruta_al_pase = sys.argv[6]
 
     directorio_pass_seleccionado=os.path.join(globals.DIRECTORIO_CON_LOS_PUNTO_PASS , f"{nombre}.pass")
     ruta_nuevo_directorio=generar_directorio_copia(directorio_pass_seleccionado)
@@ -31,15 +46,14 @@ def main():
         raise Exception("ruta_nuevo_directorio is empty")
         
     ruta_archivo_json=os.path.join(ruta_nuevo_directorio, "pass.json")
-    print("\nRuta al json")
-    print(ruta_archivo_json)
-    modificar_oferta(ruta_archivo_json,campaing_message)
+    modificar_campos(ruta_archivo_json,gigas,facturacion,mes)
 
     #Almacenamos la ruta al directorio .pass _new
     FOLDER_PUNTO_PASS= os.path.abspath(ruta_nuevo_directorio)
     ruta_directorio_new=FOLDER_PUNTO_PASS
 
-    ruta_directorio_original=extraer_cliente(nombre,campaign_id)
+    #ruta_directorio_original=extraer_cliente(nombre,campaign_id)
+    ruta_directorio_original=ruta_al_pase
     if ruta_directorio_original == "" or ruta_directorio_original is None :
          raise Exception("directorio_del_nuevo_pase is empty")
     
@@ -71,47 +85,50 @@ def main():
      ruta_absoluta_al_pkpass_new --> creados con os.path.abspath + os.path.join + nombre _new
      ruta_absoluta_al_pkpass_original creados con os.path.abspath + os.path.join + nombre original -->
     """
-    print("\n\nRutas inicio")
-    print(ruta_directorio_original)
-    print(ruta_absoluta_al_pkpass_original)
-    print(ruta_directorio_new)
-    print(ruta_absoluta_al_pkpass_new)
+
     # Eliminar el directorio original y renombrar el directorio FOLDER_PUNTO_PASS
     if os.path.exists(ruta_directorio_original):
         shutil.rmtree(ruta_directorio_original)
-        print(f"Se ha elimnado el directorio:{ruta_directorio_original}")
+        #print(f"Se ha elimnado el directorio:{ruta_directorio_original}")
         os.rename(ruta_directorio_new, ruta_directorio_original)  # Renombrar directorio FOLDER_PUNTO_PASS
 
     # Eliminar el archivo original y renombrar el archivo nuevo
     if os.path.exists(ruta_absoluta_al_pkpass_original):
         os.remove(ruta_absoluta_al_pkpass_original)  # Eliminar archivo original
-        print(f"Se ha elimnado el fichero:{ruta_directorio_original}")
+        #print(f"Se ha elimnado el fichero:{ruta_directorio_original}")
         os.rename(ruta_absoluta_al_pkpass_new, ruta_absoluta_al_pkpass_original)  # Renombrar archivo nuevo
 
-    print("\n\nRutas fin")
-    print(ruta_directorio_original)
-    print(ruta_absoluta_al_pkpass_original)
-    print(ruta_directorio_new)
-    print(ruta_absoluta_al_pkpass_new)
     #Actualizamos datos del pase en la bd
     save_pass_data_to_db(ruta_directorio_original,ruta_absoluta_al_pkpass_original,nombre)
 
-    # """Generamos una solicitud """
-    url_base = "https://pepephone.jumpingcrab.com:5000"
-    respuesta_server=common_functions.notify_apple_devices(url_base,pass_type_identifier,serial_number)
-    print(f"\n{respuesta_server}")
+    """Generamos una solicitud 
+    Por el momento, no se ha logrado generar la notificacion de forma automatica, se comentan estas lineas
+    """
+        # url_base = "https://pepephone.jumpingcrab.com:5000"
+        # respuesta_server=common_functions.notify_apple_devices(url_base,pass_type_identifier,serial_number)
+        # print(f"\n{respuesta_server}")
 
     # Si todo se ejecuto bien, salir con código de retorno 0 (éxito)
     sys.exit(0)
 
 """-----------------------------------FUNCIONES AUXILIARES-------------------------------------------"""
-def modificar_oferta(ruta_archivo_json,campaing_message):
+def modificar_campos(ruta_archivo_json,gigas,facturacion,mes):
         
     # Leer el archivo JSON
     with open(ruta_archivo_json, 'r') as archivo:
         contenido_json = json.load(archivo)
 
-    contenido_json["eventTicket"]["auxiliaryFields"][0]["value"] = campaing_message
+    facturacion_old= contenido_json["eventTicket"]["backFields"][1]["value"]
+    if facturacion_old != facturacion and facturacion !='':  
+        contenido_json["eventTicket"]["backFields"][1]["value"] = facturacion
+
+    mes_old = contenido_json["eventTicket"]["secondaryFields"][0]["value"] 
+    if mes_old != mes and mes !='':
+        contenido_json["eventTicket"]["secondaryFields"][0]["value"] = mes
+
+    gigas_old= contenido_json["eventTicket"]["secondaryFields"][2]["value"] 
+    if gigas_old != gigas and gigas !='':
+        contenido_json["eventTicket"]["secondaryFields"][2]["value"] = gigas
 
     # Guardar los cambios en el archivo JSON
 
@@ -172,60 +189,8 @@ def generar_directorio_copia(directorio):
     """
     return nombre_nuevo_directorio
 
-# def generar_directorio_copia(directorio):
-#     global PKPASS_NAME
-
-#     # Separamos el nombre y la extensión .pass del directorio
-#     nombre_directorio, extension = os.path.splitext(directorio)
-#     numero_inicial = 1
-
-#     # Comprobamos si el nombre tiene patrón _new_X, (siendo X un número)
-#     patron = r"_new_\d+$"
-#     coincidencia = re.search(patron, nombre_directorio)
-
-#     # Si lo tiene, cambiamos número X por X+1
-#     if coincidencia:
-#         numero_detectado = int(coincidencia.group()[5:])
-#         nuevo_numero = numero_detectado + 1
-#         nombre_nuevo_directorio = re.sub(patron, f"_new_{nuevo_numero}", nombre_directorio)
-#     else:
-#         # Si no lo tiene, nombramos _new_1
-#         nombre_nuevo_directorio = f"{nombre_directorio}_new_{numero_inicial}"
-
-#     PKPASS_NAME = os.path.basename(nombre_nuevo_directorio)
-#     nombre_nuevo_directorio = os.path.abspath(nombre_nuevo_directorio)  # Obtenemos la ruta completa del directorio
-
-#     # Comprobar si el nuevo directorio ya existe, si existe se incrementa el número
-#     while os.path.exists(nombre_nuevo_directorio):
-#         numero_inicial += 1
-#         nombre_nuevo_directorio = f"{nombre_directorio}_new_{numero_inicial}"
-#         PKPASS_NAME = os.path.basename(nombre_nuevo_directorio)
-#         nombre_nuevo_directorio = os.path.abspath(nombre_nuevo_directorio)
-
-#     # Crear el nuevo directorio
-#     os.mkdir(nombre_nuevo_directorio)
-
-#     print("\nDirectorio creado:", nombre_nuevo_directorio)
-
-#     evitar_archivos = [
-#         "signature",
-#         "manifest.json",
-#     ]
-
-#     # Copiar los archivos del directorio original al nuevo directorio
-#     archivos = os.listdir(directorio)
-#     for archivo in archivos:
-#         if archivo not in evitar_archivos:
-#             ruta_origen = os.path.join(directorio, archivo)
-#             if not os.path.samefile(ruta_origen, nombre_nuevo_directorio):
-#                 shutil.copy2(ruta_origen, nombre_nuevo_directorio)
-
-#     return nombre_nuevo_directorio
-
 def save_pass_data_to_db(ruta_nuevo_directorio,ruta_absoluta_al_pkpass,nombre):
 
-    print("\nRUTA PA GUARDAR EN LA DB")
-    print(ruta_absoluta_al_pkpass)
     #La variable serial_number será accedida desde main 
     global serial_number, pass_type_identifier
     ruta_archivo_json=os.path.join(ruta_nuevo_directorio, "pass.json")

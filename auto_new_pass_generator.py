@@ -8,6 +8,7 @@ from zipfile import ZipFile
 from utils import string_generator
 from utils import constants as globals
 from utils import common_functions as common_functions
+from utils import auto_emailSender as auto_emailSender
 #from db_model import *
 from models.db_model import *
 
@@ -39,10 +40,12 @@ def main():
     #Creamos el fichero .pkpass comprimiendo todos los ficheros del directorio .pass
     common_functions.generate_pkpass(FOLDER_PUNTO_PASS,PKPASS_NAME)
 
-
     shutil.move(f"{PKPASS_NAME}.pkpass", globals.DIRECTORIO_CON_LOS_PKPASS)
     ruta_al_pkpass=os.path.join(globals.DIRECTORIO_CON_LOS_PKPASS, f"{PKPASS_NAME}.pkpass")
     save_pass_data_to_db(ruta_nuevo_pass_json,ruta_al_pkpass)
+
+    #Mandamos el pase por email, indicando la ruta donde se aloja el fichero pkpass del mismo y el nombre del cliente
+    auto_emailSender.main(ruta_al_pkpass,nombre)
 
     # Si todo se ejecuto bien, salir con código de retorno 0 (éxito)
     sys.exit(0)
