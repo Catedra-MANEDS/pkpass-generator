@@ -84,8 +84,8 @@
       {
         "key": "image_change",
         "label": "Nuevas ofertas",
-        "value": "Otoño",
-        "changeMessage": "\u00BFOyes eso? Son nuevas ofertas esperandote!"
+        "value": "\u00BFOyes eso? Son nuevas ofertas esperandote!",
+        "changeMessage": "%@"
       }
     ]
   }

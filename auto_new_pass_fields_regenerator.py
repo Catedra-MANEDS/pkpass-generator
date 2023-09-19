@@ -79,23 +79,15 @@ def main():
     #Obtenemos rutas absolutas a los pkpass new y original
     ruta_absoluta_al_pkpass_new = os.path.join(ruta_directorio_pkpass, f"{PKPASS_NAME}.pkpass")
     ruta_absoluta_al_pkpass_original = os.path.join(ruta_directorio_pkpass, f"{nombre}.pkpass")
-    """
-     ruta_directorio_original --> extraido de la tablaclientes
-     FOLDER_PUNTO_PASS --> ruta al directorio copia _new
-     ruta_absoluta_al_pkpass_new --> creados con os.path.abspath + os.path.join + nombre _new
-     ruta_absoluta_al_pkpass_original creados con os.path.abspath + os.path.join + nombre original -->
-    """
 
     # Eliminar el directorio original y renombrar el directorio FOLDER_PUNTO_PASS
     if os.path.exists(ruta_directorio_original):
         shutil.rmtree(ruta_directorio_original)
-        #print(f"Se ha elimnado el directorio:{ruta_directorio_original}")
         os.rename(ruta_directorio_new, ruta_directorio_original)  # Renombrar directorio FOLDER_PUNTO_PASS
 
     # Eliminar el archivo original y renombrar el archivo nuevo
     if os.path.exists(ruta_absoluta_al_pkpass_original):
         os.remove(ruta_absoluta_al_pkpass_original)  # Eliminar archivo original
-        #print(f"Se ha elimnado el fichero:{ruta_directorio_original}")
         os.rename(ruta_absoluta_al_pkpass_new, ruta_absoluta_al_pkpass_original)  # Renombrar archivo nuevo
 
     #Actualizamos datos del pase en la bd

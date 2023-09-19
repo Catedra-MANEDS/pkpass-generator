@@ -31,8 +31,6 @@ def main():
         raise Exception("ruta_nuevo_directorio is empty")
         
     ruta_archivo_json=os.path.join(ruta_nuevo_directorio, "pass.json")
-    print("\nRuta al json")
-    print(ruta_archivo_json)
     modificar_oferta(ruta_archivo_json,campaing_message)
 
     #Almacenamos la ruta al directorio .pass _new
@@ -65,17 +63,7 @@ def main():
     #Obtenemos rutas absolutas a los pkpass new y original
     ruta_absoluta_al_pkpass_new = os.path.join(ruta_directorio_pkpass, f"{PKPASS_NAME}.pkpass")
     ruta_absoluta_al_pkpass_original = os.path.join(ruta_directorio_pkpass, f"{nombre}.pkpass")
-    """
-     ruta_directorio_original --> extraido de la tablaclientes
-     FOLDER_PUNTO_PASS --> ruta al directorio copia _new
-     ruta_absoluta_al_pkpass_new --> creados con os.path.abspath + os.path.join + nombre _new
-     ruta_absoluta_al_pkpass_original creados con os.path.abspath + os.path.join + nombre original -->
-    """
-    print("\n\nRutas inicio")
-    print(ruta_directorio_original)
-    print(ruta_absoluta_al_pkpass_original)
-    print(ruta_directorio_new)
-    print(ruta_absoluta_al_pkpass_new)
+
     # Eliminar el directorio original y renombrar el directorio FOLDER_PUNTO_PASS
     if os.path.exists(ruta_directorio_original):
         shutil.rmtree(ruta_directorio_original)
@@ -88,11 +76,6 @@ def main():
         print(f"Se ha elimnado el fichero:{ruta_directorio_original}")
         os.rename(ruta_absoluta_al_pkpass_new, ruta_absoluta_al_pkpass_original)  # Renombrar archivo nuevo
 
-    print("\n\nRutas fin")
-    print(ruta_directorio_original)
-    print(ruta_absoluta_al_pkpass_original)
-    print(ruta_directorio_new)
-    print(ruta_absoluta_al_pkpass_new)
     #Actualizamos datos del pase en la bd
     save_pass_data_to_db(ruta_directorio_original,ruta_absoluta_al_pkpass_original,nombre)
 
@@ -165,67 +148,10 @@ def generar_directorio_copia(directorio):
             if not os.path.samefile(ruta_origen, ruta_destino):
                 shutil.copy2(ruta_origen, ruta_destino)
 
-    """QUEDA EL ERROR 
-        SOLUCIONADO ---> DE QUE SI SON EXACTAMENTE LOS MISMOS ARCHIVOS LOS COPIA, regenerar pepito_new.pass 
-        NO SOLUCIONADO ---> si no son los mismos archivos, ej hacer copia de un .pass sin version new, si da error
-                        porque coge la ruta del directorio+archivo, y tiene que ser solo la del directorio
-    """
     return nombre_nuevo_directorio
-
-# def generar_directorio_copia(directorio):
-#     global PKPASS_NAME
-
-#     # Separamos el nombre y la extensión .pass del directorio
-#     nombre_directorio, extension = os.path.splitext(directorio)
-#     numero_inicial = 1
-
-#     # Comprobamos si el nombre tiene patrón _new_X, (siendo X un número)
-#     patron = r"_new_\d+$"
-#     coincidencia = re.search(patron, nombre_directorio)
-
-#     # Si lo tiene, cambiamos número X por X+1
-#     if coincidencia:
-#         numero_detectado = int(coincidencia.group()[5:])
-#         nuevo_numero = numero_detectado + 1
-#         nombre_nuevo_directorio = re.sub(patron, f"_new_{nuevo_numero}", nombre_directorio)
-#     else:
-#         # Si no lo tiene, nombramos _new_1
-#         nombre_nuevo_directorio = f"{nombre_directorio}_new_{numero_inicial}"
-
-#     PKPASS_NAME = os.path.basename(nombre_nuevo_directorio)
-#     nombre_nuevo_directorio = os.path.abspath(nombre_nuevo_directorio)  # Obtenemos la ruta completa del directorio
-
-#     # Comprobar si el nuevo directorio ya existe, si existe se incrementa el número
-#     while os.path.exists(nombre_nuevo_directorio):
-#         numero_inicial += 1
-#         nombre_nuevo_directorio = f"{nombre_directorio}_new_{numero_inicial}"
-#         PKPASS_NAME = os.path.basename(nombre_nuevo_directorio)
-#         nombre_nuevo_directorio = os.path.abspath(nombre_nuevo_directorio)
-
-#     # Crear el nuevo directorio
-#     os.mkdir(nombre_nuevo_directorio)
-
-#     print("\nDirectorio creado:", nombre_nuevo_directorio)
-
-#     evitar_archivos = [
-#         "signature",
-#         "manifest.json",
-#     ]
-
-#     # Copiar los archivos del directorio original al nuevo directorio
-#     archivos = os.listdir(directorio)
-#     for archivo in archivos:
-#         if archivo not in evitar_archivos:
-#             ruta_origen = os.path.join(directorio, archivo)
-#             if not os.path.samefile(ruta_origen, nombre_nuevo_directorio):
-#                 shutil.copy2(ruta_origen, nombre_nuevo_directorio)
-
-#     return nombre_nuevo_directorio
 
 def save_pass_data_to_db(ruta_nuevo_directorio,ruta_absoluta_al_pkpass,nombre):
 
-    print("\nRUTA PA GUARDAR EN LA DB")
-    print(ruta_absoluta_al_pkpass)
     #La variable serial_number será accedida desde main 
     global serial_number, pass_type_identifier
     ruta_archivo_json=os.path.join(ruta_nuevo_directorio, "pass.json")
