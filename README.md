@@ -1,56 +1,44 @@
 # pkpass-generator
 
-Generador y actualizador de pases para apple wallet (ficheros .pkpass) 
+Lógica del generador y actualizador de pases para apple wallet (ficheros .pkpass) 
 
 ## Estructura del proyecto
-Hay 3 scripts principales menu_pase,py, new_pass_generator.py y pass_regenerator.py, además de unos directorios auxiliares
+Se cuenta con 3 scripts principales que automatoizan la lógica necesaria para crear nuevos pases y modificar sus características, además de generar notificaciones PUSH. Adicionalmente, se cuenta con scripts que realizan funcionanes auxiliares. Por otro lado, se cuenta con los directorios donde se almacenan las plantillas de creación de pases. En estas plantillas se incluyen los archivos empleados en la creación de los pases, como las imagenes o fichero JSON que compondrán el pase. También se cuenta con un directorio donde se almacenan los certificados con los que se firman los pases, así como el directorio donde se almacenan los pases creados en su formato .pkpass. 
 
 ## Tabla de Contenidos
 
-- [menu_pase](#menu_pase)
-- [new_pass_generator](#new_pass_generator)
-- [pass_regenerator](#pass_regenerator)
+- [auto_new_pass_generator](#auto_new_pass_generator)
+- [auto_new_pass_fields_regenerator](#auto_new_pass_fields_regenerator)
+- [auto_pass_regenerator](#auto_pass_regenerator)
 - [directorios_auxiliares](#directorios_auxiliares)
-- [Uso](#uso)
 
-## menu_pase
+## auto_new_pass_generator
 
-Menu principal de todo el proyecto, muestra opciones como:
+Script que automatiza la generación de un pase
 
-	-Crear un nuevo pase
-	-Modificar y actualizar un pase existente 
-	-Eliminar un pase
-	-Enviar un pase por correo electronico
 
-## new_pass_generator
+## auto_new_pass_fields_regenerator
 
-Script que genera un nuevo pase.
+Script que actualiza un pase ya existente, para las notificaciones de contratos
+ 
+## auto_pass_regenerator
 
-	-Mediante un menú se escoge una plantilla para el nuevo pase a crear
-	-Recoge por teclado el nombre para el nuevo pase
+Script que actualiza un pase ya existente, para las notificaciones de las campañas 
 	
-## pass_regenerator
-
-Script que modifica y actualiza un pase ya existente.
-	
-	-Mediante un menú se escoge de los pases ya existentes cual se desea modificar
 
 ## directorios_auxiliares
 
-- models --> directorio que contiene el modelo de tablas de la base de datos Postgress gestionada con SQLAlchemy
-- utils --> directorio que contiene metodos auxiliares empleados por los scripts principales
-
-	- common_functions.py --> contiene las funciones comunes a los dos scripts principales para la gestion de pases 
-
-- pkpass_files --> directorio donde se almacenan los ficheros .pkpass generados
-- directorios_punto_pass --> directorio con los directorios .pass que contienen los ficheros empleados para generar el fichero .pkpass
-- footer_images --> directorio con footer_images adicionales para modificar las imagenes de un pase
-- strip_images --> directorio con strip_images adicionales para modificar las imagenes de un pase
-
+	- directorios_punto_pass --> contiene las plantillas para la creación de pases
+   	- pkpass_files --> contienen los pases en creados en formato .pkpass
+   	- certificados --> contiene los certificados empleados para firmar los pases
+   	- models --> contiene el modelo de datos para conectar con la base de datos
+   	- utils --> contiene los scripts auxiliares
+  
 
 
 
 
 
  
+
 
