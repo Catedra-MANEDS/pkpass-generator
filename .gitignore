@@ -5,3 +5,4 @@ config_db/__pycache__
 post_request_generator.py
 scripts_python_extra
 nuevos_certificados
+certificados_no_mandar
